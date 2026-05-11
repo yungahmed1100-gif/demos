@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BZNSFLOW — AI Revenue Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0A0B;
+  --bg1:#0F0F11;
+  --bg2:#141416;
+  --bg3:#1A1A1E;
+  --bg4:#202026;
+  --line:#FFFFFF0D;
+  --line2:#FFFFFF18;
+  --line3:#FFFFFF28;
+  --txt:#F0EFE8;
+  --txt2:#8A8980;
+  --txt3:#4A4945;
+  --gold:#C9973A;
+  --gold-d:#8B6520;
+  --gold-glow:#C9973A22;
+  --green:#1D9E75;
+  --green-d:#0F5040;
+  --green-glow:#1D9E7522;
+  --red:#D85A30;
+  --red-d:#7A2A10;
+  --red-glow:#D85A3022;
+  --blue:#378ADD;
+  --blue-d:#0F3060;
+  --blue-glow:#378ADD18;
+  --purple:#7F77DD;
+  --purple-glow:#7F77DD18;
+  --urgent:#FF4040;
+  --urgent-glow:#FF404018;
+}
+
+@keyframes pulse-red{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes pulse-green{0%,100%{opacity:.9}50%{opacity:.5}}
+@keyframes slide-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes timer-pulse{0%,100%{opacity:1;text-shadow:0 0 5px currentColor}50%{opacity:.55;text-shadow:none}}
+@keyframes bar-grow{from{width:0!important}to{}}
+
+body{margin:0;padding:0;background:var(--bg);}
+
+.d{font-family:'Cairo',sans-serif;width:100%;background:var(--bg);color:var(--txt);direction:rtl;min-height:600px;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.2rem;border-bottom:1px solid var(--line2);background:var(--bg1);}
+.brand{display:flex;align-items:center;gap:10px;flex-direction:row-reverse;}
+.bname{font-size:13px;font-weight:900;color:var(--txt);letter-spacing:.08em;}
+.bsub{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-green 2s infinite;flex-shrink:0;}
+.live-txt{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--green);letter-spacing:.06em;}
+.broker-chip{display:flex;align-items:center;gap:7px;padding:4px 10px;border:1px solid var(--line3);border-radius:6px;flex-direction:row-reverse;}
+.broker-av{width:24px;height:24px;border-radius:5px;background:var(--gold-glow);border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold);}
+.broker-nm{font-size:11px;font-weight:700;color:var(--txt);}
+.broker-rank{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--green);}
+.period{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);padding:3px 8px;border:1px solid var(--line2);border-radius:4px;cursor:default;}
+
+/* ── TICKER ── */
+.ticker-wrap{overflow:hidden;background:var(--bg2);border-bottom:1px solid var(--line2);padding:.3rem 0;cursor:pointer;}
+.ticker-inner{display:flex;gap:0;white-space:nowrap;animation:ticker 28s linear infinite;}
+.ticker-wrap:hover .ticker-inner{animation-play-state:paused;}
+.tick-item{display:inline-flex;align-items:center;gap:8px;padding:0 2rem;border-right:1px solid var(--line2);}
+.tick-lbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);}
+.tick-val{font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:500;}
+.tick-chg{font-size:9px;font-family:'IBM Plex Mono',monospace;}
+
+/* ── COMMAND STRIP ── */
+.cmd-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line2);border-bottom:1px solid var(--line2);}
+.cmd-cell{background:var(--bg1);padding:.65rem .8rem;position:relative;overflow:hidden;transition:background .15s;cursor:default;}
+.cmd-cell:hover{background:var(--bg2);}
+.cmd-cell::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.cmd-cell.danger::after{background:var(--urgent);}
+.cmd-cell.warning::after{background:var(--gold);}
+.cmd-cell.success::after{background:var(--green);}
+.cmd-cell.info::after{background:var(--blue);}
+.cmd-cell.neutral::after{background:var(--txt3);}
+.cmd-l{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.cmd-v{font-size:18px;font-weight:800;line-height:1;}
+.cmd-v.danger{color:var(--urgent);}
+.cmd-v.warning{color:var(--gold);}
+.cmd-v.success{color:var(--green);}
+.cmd-v.info{color:var(--blue);}
+.cmd-v.neutral{color:var(--txt);}
+.cmd-d{font-size:9px;font-family:'IBM Plex Mono',monospace;margin-top:3px;}
+.cmd-u{font-size:10px;font-weight:400;color:var(--txt2);margin-right:1px;}
+.blink-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--urgent);animation:blink 1s infinite;margin-left:4px;vertical-align:middle;}
+
+/* ── MAIN BODY ── */
+.body{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.7rem;}
+.main-row{display:grid;grid-template-columns:1.4fr 1fr;gap:.7rem;}
+.bot-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;}
+
+/* ── PANEL BASE ── */
+.panel{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;overflow:hidden;}
+.ph{padding:.5rem .85rem;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;flex-direction:row-reverse;background:var(--bg3);}
+.pt{font-size:10px;font-weight:700;color:var(--txt);letter-spacing:.02em;}
+.pb{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);}
+.pbody{padding:.65rem .85rem;}
+.panel.danger-border{border-color:var(--red)44;}
+.panel.gold-border{border-color:var(--gold)44;}
+.panel.green-border{border-color:var(--green)44;}
+
+/* ── PIPELINE COMMAND MAP ── */
+.pipe-stages{display:flex;flex-direction:column;gap:6px;}
+.pipe-stage{display:flex;align-items:center;gap:8px;}
+.ps-label{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);width:80px;text-align:right;flex-shrink:0;}
+.ps-bar-wrap{flex:1;position:relative;height:28px;}
+.ps-bar-bg{position:absolute;inset:0;background:var(--bg3);border-radius:3px;}
+.ps-bar-fill{position:absolute;top:0;right:0;height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-start;padding:0 8px;gap:6px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.ps-count{font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:500;}
+.ps-val{font-size:9px;font-family:'IBM Plex Mono',monospace;color:inherit;opacity:.7;}
+.ps-right{display:flex;align-items:center;gap:6px;width:120px;justify-content:flex-end;flex-shrink:0;}
+.ps-gci{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);}
+.risk-flag{font-size:8px;font-family:'IBM Plex Mono',monospace;padding:1px 5px;border-radius:3px;}
+.rf-red{background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)44;}
+.rf-gold{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);}
+.rf-green{background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);}
+.pipe-footer{margin-top:8px;padding-top:7px;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;}
+.pf-item{text-align:center;}
+.pf-lbl{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);}
+.pf-val{font-size:13px;font-weight:700;}
+
+/* ── AI DECISION ENGINE ── */
+.ai-cards{display:flex;flex-direction:column;gap:5px;}
+.ai-card{border-radius:6px;padding:.55rem .7rem;display:flex;align-items:flex-start;gap:8px;flex-direction:row-reverse;border:1px solid transparent;cursor:pointer;transition:border-color .15s,transform .12s,box-shadow .12s;}
+.ai-card:hover{transform:translateX(-2px);}
+.ai-card.critical{background:var(--urgent-glow);border-color:var(--urgent)33;}
+.ai-card.critical:hover{border-color:var(--urgent)88;box-shadow:0 0 12px var(--urgent)22;}
+.ai-card.warning{background:var(--gold-glow);border-color:var(--gold-d)44;}
+.ai-card.warning:hover{border-color:var(--gold)88;}
+.ai-card.insight{background:var(--blue-glow);border-color:var(--blue-d)44;}
+.ai-card.insight:hover{border-color:var(--blue)66;}
+.ai-card.opportunity{background:var(--green-glow);border-color:var(--green-d)44;}
+.ai-card.opportunity:hover{border-color:var(--green)66;}
+.ai-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.ai-body{flex:1;}
+.ai-title{font-size:11px;font-weight:700;line-height:1.3;}
+.ai-card.critical .ai-title{color:var(--urgent);}
+.ai-card.warning .ai-title{color:var(--gold);}
+.ai-card.insight .ai-title{color:var(--blue);}
+.ai-card.opportunity .ai-title{color:var(--green);}
+.ai-sub{font-size:10px;color:var(--txt2);margin-top:2px;line-height:1.4;}
+.ai-action{font-size:8px;font-family:'IBM Plex Mono',monospace;margin-top:4px;padding:2px 7px;border-radius:3px;display:inline-block;}
+.ai-card.critical .ai-action{background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)44;}
+.ai-card.warning .ai-action{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);}
+.ai-card.insight .ai-action{background:var(--blue-glow);color:var(--blue);border:1px solid var(--blue-d);}
+.ai-card.opportunity .ai-action{background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);}
+.ai-badge{font-size:8px;font-family:'IBM Plex Mono',monospace;padding:1px 5px;border-radius:3px;flex-shrink:0;margin-top:2px;}
+.badge-crit{background:var(--urgent);color:#fff;}
+.badge-warn{background:var(--gold-d);color:var(--gold);}
+.badge-info{background:var(--blue-d);color:var(--blue);}
+.badge-opp{background:var(--green-d);color:var(--green);}
+
+/* ── REVENUE LEAKAGE ── */
+.leak-items{display:flex;flex-direction:column;gap:5px;}
+.leak-item{background:var(--bg3);border-radius:6px;padding:.5rem .7rem;border:1px solid var(--line2);display:flex;align-items:center;gap:8px;flex-direction:row-reverse;transition:transform .12s;}
+.leak-item:hover{transform:translateX(-1px);}
+.leak-item.hot-leak{border-color:var(--urgent)33;background:var(--urgent-glow);}
+.leak-left{flex:1;text-align:right;}
+.leak-name{font-size:11px;font-weight:600;color:var(--txt);}
+.leak-detail{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:2px;}
+.leak-right{text-align:left;}
+.leak-cost{font-size:13px;font-weight:800;font-family:'IBM Plex Mono',monospace;}
+.leak-cost.danger{color:var(--urgent);}
+.leak-cost.warn{color:var(--gold);}
+.leak-timer{font-size:8px;font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.leak-timer.danger{color:var(--urgent);animation:timer-pulse 1.8s infinite;}
+.leak-timer.warn-timer{color:var(--gold);animation:timer-pulse 2.5s infinite;}
+.leak-footer{margin-top:8px;padding:6px 8px;background:var(--urgent-glow);border-radius:5px;border:1px solid var(--urgent)33;display:flex;justify-content:space-between;align-items:center;}
+.lf-lbl{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--urgent);}
+.lf-val{font-size:14px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--urgent);}
+
+/* ── HOT LEADS VELOCITY ── */
+.lead-rows{display:flex;flex-direction:column;gap:4px;}
+.lead-row{background:var(--bg3);border-radius:6px;padding:.45rem .65rem;border:1px solid var(--line2);display:flex;align-items:center;gap:6px;flex-direction:row-reverse;transition:transform .12s,border-color .15s;}
+.lead-row:hover{transform:translateX(-1px);}
+.lead-av{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.lead-info{flex:1;text-align:right;}
+.lead-name{font-size:11px;font-weight:600;color:var(--txt);}
+.lead-sub{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;}
+.intent-bar{display:flex;align-items:center;gap:4px;}
+.intent-bg{width:50px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.intent-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.intent-num{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);}
+.lead-val{font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--gold);min-width:50px;text-align:left;}
+.lead-decay{font-size:8px;font-family:'IBM Plex Mono',monospace;min-width:36px;text-align:left;}
+
+/* ── CONVERSION VELOCITY ── */
+.vel-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.vel-card{background:var(--bg3);border-radius:6px;padding:.55rem .65rem;border:1px solid var(--line2);transition:border-color .15s;}
+.vel-card:hover{border-color:var(--line3);}
+.vel-n{font-size:20px;font-weight:800;line-height:1;}
+.vel-l{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:2px;}
+.vel-trend{font-size:9px;font-family:'IBM Plex Mono',monospace;margin-top:3px;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line2);padding:0 1rem;background:var(--bg2);}
+.tab{padding:.5rem .9rem;font-size:10px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.02em;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab:hover:not(.active){color:var(--txt2);}
+
+/* VIEWS */
+.view{display:none;}.view.active{display:block;animation:slide-in .18s ease;}
+
+/* ── CONTACTS TABLE ── */
+.ctable{width:100%;border-collapse:collapse;}
+.ctable th{font-size:8px;font-weight:600;color:var(--txt3);padding:.4rem .65rem;text-align:right;border-bottom:1px solid var(--line2);background:var(--bg3);font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;}
+.ctable td{font-size:10px;padding:.4rem .65rem;text-align:right;border-bottom:1px solid var(--line2);color:var(--txt);}
+.ctable tr:hover td{background:var(--bg3);}
+.ctable tr:last-child td{border-bottom:none;}
+.stage-pill{font-size:8px;font-family:'IBM Plex Mono',monospace;padding:2px 6px;border-radius:3px;}
+.score-wrap{display:flex;align-items:center;gap:4px;justify-content:flex-end;}
+.sc-bg{width:36px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.sc-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.sc-n{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);}
+.act-btn{font-size:8px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border:1px solid var(--line3);border-radius:3px;background:none;color:var(--gold);cursor:pointer;transition:all .15s;}
+.act-btn:hover{background:var(--gold-glow);border-color:var(--gold-d);}
+
+/* ── TASKS ── */
+.task-item{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--line2);flex-direction:row-reverse;}
+.task-item:last-child{border-bottom:none;}
+.task-chk{width:15px;height:15px;border-radius:3px;border:1px solid var(--line3);display:flex;align-items:center;justify-content:center;font-size:8px;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.task-chk:hover:not(.done){border-color:var(--green);background:var(--green-glow);}
+.task-chk.done{background:var(--green);border-color:var(--green);color:#000;}
+.task-txt{flex:1;font-size:11px;color:var(--txt);}
+.task-txt.done{text-decoration:line-through;color:var(--txt3);}
+.due-pill{font-size:8px;font-family:'IBM Plex Mono',monospace;padding:1px 6px;border-radius:3px;}
+.du{background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)33;}
+.dw{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);}
+.dg{background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);}
+
+/* ── SECTION LABEL ── */
+.slabel{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+
+/* ── AI PROMPT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:#000000BB;display:flex;align-items:flex-end;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--bg2);border:1px solid var(--line3);border-radius:12px 12px 0 0;width:100%;max-width:520px;padding:1.2rem 1.2rem 1.8rem;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-prompt-body{font-size:12px;color:var(--txt);line-height:1.7;background:var(--bg3);border:1px solid var(--line2);border-radius:6px;padding:.8rem;margin-bottom:.8rem;min-height:52px;}
+.modal-btn{padding:.55rem;border-radius:6px;font-family:'Cairo',sans-serif;font-size:11px;cursor:pointer;transition:all .15s;border:1px solid;}
+.modal-btn-copy{background:var(--bg3);border-color:var(--line3);color:var(--txt2);}
+.modal-btn-copy:hover{border-color:var(--gold);color:var(--gold);}
+.modal-btn-claude{background:var(--gold-glow);border-color:var(--gold-d);color:var(--gold);font-weight:700;}
+.modal-btn-claude:hover{background:var(--gold-d)33;}
+
+/* ── TOAST ── */
+.toast-msg{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--green)44;border-radius:8px;padding:.4rem 1.1rem;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--green);z-index:10001;transition:transform .22s,opacity .22s;opacity:0;pointer-events:none;white-space:nowrap;}
+.toast-msg.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ── KANBAN CARDS (Pipeline) ── */
+.k-card{background:var(--bg3);border:1px solid var(--line2);border-radius:6px;padding:.45rem .55rem;transition:border-color .15s,transform .12s;}
+.k-card:hover{transform:translateY(-1px);border-color:var(--line3);}
+</style>
+</head>
+<body>
+<div class="d" role="main">
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">مركز قيادة إيرادات BZNSFLOW - نظام ذكاء اصطناعي عقاري</h2>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <svg style="width:22px;height:22px;" viewBox="0 0 120 120" fill="none">
+      <rect x="35" y="10" width="30" height="55" fill="#F0EFE8"/>
+      <rect x="35" y="45" width="28" height="28" fill="#1D9E75"/>
+      <rect x="63" y="45" width="22" height="28" rx="14" fill="#378ADD"/>
+      <circle cx="74" cy="59" r="7" fill="#0A0A0B"/>
+      <circle cx="44" cy="90" r="13" fill="#C9973A"/>
+      <rect x="57" y="77" width="26" height="13" fill="#D85A30" rx="3"/>
+      <rect x="83" y="70" width="17" height="30" rx="14" fill="#F0EFE8"/>
+      <line x1="28" y1="102" x2="102" y2="102" stroke="#F0EFE8" stroke-width="2.5"/>
+    </svg>
+    <div style="text-align:right;">
+      <div class="bname">BZNSFLOW</div>
+      <div class="bsub">AI REVENUE COMMAND CENTER</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-direction:row-reverse;">
+    <div style="display:flex;align-items:center;gap:5px;flex-direction:row-reverse;">
+      <div class="live-dot"></div>
+      <span class="live-txt">نظام مباشر</span>
+    </div>
+    <div class="broker-chip">
+      <div class="broker-av">خ.ر</div>
+      <div style="text-align:right;">
+        <div class="broker-nm">خالد الراشدي</div>
+        <div class="broker-rank">▲ أفضل منتج</div>
+      </div>
+    </div>
+    <span class="period" id="live-clock">مايو 2026 · Q2</span>
+  </div>
+</div>
+
+<!-- MARKET TICKER (hover to pause) -->
+<div class="ticker-wrap" title="مرر مؤشر الفأرة للإيقاف المؤقت">
+  <div class="ticker-inner">
+    <div class="tick-item"><span class="tick-lbl">دبي هيلز</span><span class="tick-val" style="color:var(--green);">$1,450/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 3.2%</span></div>
+    <div class="tick-item"><span class="tick-lbl">JBR</span><span class="tick-val" style="color:var(--green);">$870/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 1.8%</span></div>
+    <div class="tick-item"><span class="tick-lbl">DIFC</span><span class="tick-val" style="color:var(--gold);">$1,220/قدم²</span><span class="tick-chg" style="color:var(--gold);">◆ 0.2%</span></div>
+    <div class="tick-item"><span class="tick-lbl">MBR سيتي</span><span class="tick-val" style="color:var(--green);">$980/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 2.1%</span></div>
+    <div class="tick-item"><span class="tick-lbl">JLT</span><span class="tick-val" style="color:var(--red);">$720/قدم²</span><span class="tick-chg" style="color:var(--red);">▼ 0.9%</span></div>
+    <div class="tick-item"><span class="tick-lbl">معدل إيجار دبي</span><span class="tick-val" style="color:var(--blue);">7.2%</span><span class="tick-chg" style="color:var(--green);">▲ 0.4%</span></div>
+    <div class="tick-item"><span class="tick-lbl">صفقات DLD أمس</span><span class="tick-val" style="color:var(--txt);">1,847</span><span class="tick-chg" style="color:var(--green);">▲ 12%</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="tick-item"><span class="tick-lbl">دبي هيلز</span><span class="tick-val" style="color:var(--green);">$1,450/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 3.2%</span></div>
+    <div class="tick-item"><span class="tick-lbl">JBR</span><span class="tick-val" style="color:var(--green);">$870/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 1.8%</span></div>
+    <div class="tick-item"><span class="tick-lbl">DIFC</span><span class="tick-val" style="color:var(--gold);">$1,220/قدم²</span><span class="tick-chg" style="color:var(--gold);">◆ 0.2%</span></div>
+    <div class="tick-item"><span class="tick-lbl">MBR سيتي</span><span class="tick-val" style="color:var(--green);">$980/قدم²</span><span class="tick-chg" style="color:var(--green);">▲ 2.1%</span></div>
+    <div class="tick-item"><span class="tick-lbl">JLT</span><span class="tick-val" style="color:var(--red);">$720/قدم²</span><span class="tick-chg" style="color:var(--red);">▼ 0.9%</span></div>
+    <div class="tick-item"><span class="tick-lbl">معدل إيجار دبي</span><span class="tick-val" style="color:var(--blue);">7.2%</span><span class="tick-chg" style="color:var(--green);">▲ 0.4%</span></div>
+    <div class="tick-item"><span class="tick-lbl">صفقات DLD أمس</span><span class="tick-val" style="color:var(--txt);">1,847</span><span class="tick-chg" style="color:var(--green);">▲ 12%</span></div>
+  </div>
+</div>
+
+<!-- COMMAND STRIP -->
+<div class="cmd-strip">
+  <div class="cmd-cell danger">
+    <div class="cmd-l">إيرادات في خطر<div class="blink-dot" style="display:inline-block;"></div></div>
+    <div class="cmd-v danger"><span class="cmd-u">$</span>312K</div>
+    <div class="cmd-d" style="color:var(--urgent);">14 عميل غير متابَع</div>
+  </div>
+  <div class="cmd-cell warning">
+    <div class="cmd-l">عمولة متوقعة</div>
+    <div class="cmd-v warning"><span class="cmd-u">$</span>204K</div>
+    <div class="cmd-d" style="color:var(--gold);">Q2 المتبقي · 7 صفقات</div>
+  </div>
+  <div class="cmd-cell success">
+    <div class="cmd-l">عملاء استُردوا بالذكاء</div>
+    <div class="cmd-v success">11</div>
+    <div class="cmd-d" style="color:var(--green);">▲ $89K محمية</div>
+  </div>
+  <div class="cmd-cell danger">
+    <div class="cmd-l">عملاء ساخنون ينتظرون</div>
+    <div class="cmd-v danger">7<div class="blink-dot" style="display:inline-block;"></div></div>
+    <div class="cmd-d" style="color:var(--urgent);">متوسط انتظار &gt;4 ساعات</div>
+  </div>
+  <div class="cmd-cell warning">
+    <div class="cmd-l">متوسط وقت الرد</div>
+    <div class="cmd-v warning">3.2h</div>
+    <div class="cmd-d" style="color:var(--red);">الهدف &lt;30 دقيقة</div>
+  </div>
+  <div class="cmd-cell info">
+    <div class="cmd-l">سرعة التحويل</div>
+    <div class="cmd-v info">11.7%</div>
+    <div class="cmd-d" style="color:var(--blue);">▲ 2.1% هذا الشهر</div>
+  </div>
+  <div class="cmd-cell success">
+    <div class="cmd-l">زخم الصفقات</div>
+    <div class="cmd-v success">+4</div>
+    <div class="cmd-d" style="color:var(--green);">تسارع هذا الأسبوع</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('ops',this)">مركز العمليات</div>
+  <div class="tab" onclick="switchTab('pipeline',this)">خريطة الأنابيب</div>
+  <div class="tab" onclick="switchTab('contacts',this)">ذكاء العملاء</div>
+  <div class="tab" onclick="switchTab('tasks',this)">المهام العاجلة</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- VIEW: مركز العمليات -->
+<!-- ════════════════════════════════ -->
+<div id="view-ops" class="view active">
+<div class="body">
+  <div class="main-row">
+
+    <!-- PIPELINE COMMAND MAP -->
+    <div class="panel gold-border">
+      <div class="ph">
+        <span class="pt">خريطة أنابيب الإيرادات</span>
+        <span class="pb">$2.34M إجمالي · 5 مراحل</span>
+      </div>
+      <div class="pbody">
+        <div class="pipe-stages">
+
+          <div class="pipe-stage">
+            <span class="ps-label">عملاء جدد</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-bg"></div>
+              <div class="ps-bar-fill" data-width="100%" style="width:0;background:var(--blue-d);border:1px solid var(--blue-d);">
+                <span class="ps-count" style="color:var(--blue);">72</span>
+                <span class="ps-val" style="color:var(--blue);">عميل</span>
+              </div>
+            </div>
+            <div class="ps-right"><span class="ps-gci">$—</span><span class="risk-flag rf-gold">مرشح</span></div>
+          </div>
+
+          <div class="pipe-stage">
+            <span class="ps-label">تواصل نشط</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-bg"></div>
+              <div class="ps-bar-fill" data-width="82%" style="width:0;background:#1A2840;">
+                <span class="ps-count" style="color:var(--blue);">45</span>
+                <span class="ps-val" style="color:var(--blue);">عميل</span>
+              </div>
+            </div>
+            <div class="ps-right"><span class="ps-gci">$940K</span><span class="risk-flag rf-gold">متابعة</span></div>
+          </div>
+
+          <div class="pipe-stage">
+            <span class="ps-label">معاينة / نية</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-bg"></div>
+              <div class="ps-bar-fill" data-width="58%" style="width:0;background:#1E1A10;">
+                <span class="ps-count" style="color:var(--gold);">29</span>
+                <span class="ps-val" style="color:var(--gold);">عميل</span>
+              </div>
+            </div>
+            <div class="ps-right"><span class="ps-gci">$780K</span><span class="risk-flag rf-red">خطر ⚠</span></div>
+          </div>
+
+          <div class="pipe-stage">
+            <span class="ps-label">عرض / MOU</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-bg"></div>
+              <div class="ps-bar-fill" data-width="36%" style="width:0;background:#1A2A1A;">
+                <span class="ps-count" style="color:var(--green);">18</span>
+                <span class="ps-val" style="color:var(--green);">عميل</span>
+              </div>
+            </div>
+            <div class="ps-right"><span class="ps-gci">$490K</span><span class="risk-flag rf-green">نشط ✓</span></div>
+          </div>
+
+          <div class="pipe-stage">
+            <span class="ps-label">إغلاق نهائي</span>
+            <div class="ps-bar-wrap">
+              <div class="ps-bar-bg"></div>
+              <div class="ps-bar-fill" data-width="22%" style="width:0;background:#1A2A1A;">
+                <span class="ps-count" style="color:var(--green);">7</span>
+                <span class="ps-val" style="color:var(--green);">هذا الشهر</span>
+              </div>
+            </div>
+            <div class="ps-right"><span class="ps-gci">$85K GCI</span><span class="risk-flag rf-green">مُغلق ✓</span></div>
+          </div>
+
+        </div>
+        <div class="pipe-footer">
+          <div class="pf-item"><div class="pf-lbl">إيرادات خط الأنابيب</div><div class="pf-val" style="color:var(--gold);">$2.34M</div></div>
+          <div class="pf-item"><div class="pf-lbl">GCI متوقع</div><div class="pf-val" style="color:var(--green);">$204K</div></div>
+          <div class="pf-item"><div class="pf-lbl">محاصر / متوقف</div><div class="pf-val" style="color:var(--urgent);">14 صفقة</div></div>
+          <div class="pf-item"><div class="pf-lbl">سرعة التحويل</div><div class="pf-val" style="color:var(--blue);">11.7%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI DECISION ENGINE -->
+    <div class="panel danger-border">
+      <div class="ph">
+        <span class="pt" style="display:flex;align-items:center;gap:6px;flex-direction:row-reverse;">
+          <span style="color:var(--urgent);">محرك القرار الذكي</span>
+          <span style="font-size:9px;background:var(--urgent);color:#fff;padding:1px 5px;border-radius:3px;font-family:'IBM Plex Mono',monospace;">AI LIVE</span>
+        </span>
+        <span class="pb">8 تنبيهات نشطة</span>
+      </div>
+      <div class="pbody">
+        <div class="ai-cards">
+          <div class="ai-card critical" onclick="sendPrompt('اعطني قائمة العملاء الساخنين غير المتابَعين منذ أكثر من 4 ساعات مع خطة إجراء فورية')">
+            <div class="ai-icon">🔥</div>
+            <div class="ai-body">
+              <div class="ai-title">7 عملاء ساخنون غير نشطين &gt;4 ساعات</div>
+              <div class="ai-sub">احتمال تسرب $312K · النية عالية جداً</div>
+              <div class="ai-action">تفعيل متابعة فورية ↗</div>
+            </div>
+            <div class="ai-badge badge-crit">عاجل</div>
+          </div>
+          <div class="ai-card warning" onclick="sendPrompt('تحليل قائمة رقم 204 واقتراح تعديل السعر بناءً على بيانات السوق')">
+            <div class="ai-icon">🏢</div>
+            <div class="ai-body">
+              <div class="ai-title">عقار #204 يتطلب تعديل سعر</div>
+              <div class="ai-sub">62 يوم بلا عرض · السوق تحرك -3.5%</div>
+              <div class="ai-action">مراجعة استراتيجية التسعير ↗</div>
+            </div>
+            <div class="ai-badge badge-warn">سعر</div>
+          </div>
+          <div class="ai-card insight" onclick="sendPrompt('أعطني نصائح لاستخدام الرسائل الصوتية عبر واتساب لتحسين معدل التحويل مع المشترين الخليجيين')">
+            <div class="ai-icon">🧠</div>
+            <div class="ai-body">
+              <div class="ai-title">الرسائل الصوتية تتفوق بنسبة 28%</div>
+              <div class="ai-sub">واتساب voice notes تحقق تحويلاً أعلى مع المشترين الخليجيين</div>
+              <div class="ai-action">تطبيق الاستراتيجية ↗</div>
+            </div>
+            <div class="ai-badge badge-info">ذكاء</div>
+          </div>
+          <div class="ai-card opportunity" onclick="sendPrompt('أعطني قائمة المشترين الفاخرين في دبي هيلز مع استراتيجية الاستهداف')">
+            <div class="ai-icon">📈</div>
+            <div class="ai-body">
+              <div class="ai-title">مشترو دبي هيلز يحولون بنسبة أعلى 31%</div>
+              <div class="ai-sub">3 عملاء محتملون في خطك · نافذة فرصة مفتوحة</div>
+              <div class="ai-action">استهداف الآن ↗</div>
+            </div>
+            <div class="ai-badge badge-opp">فرصة</div>
+          </div>
+          <div class="ai-card warning" onclick="sendPrompt('احسب تكلفة التأخر في المتابعة على خط الأنابيب الحالي وأعطني خطة إنقاذ')">
+            <div class="ai-icon">⚠️</div>
+            <div class="ai-body">
+              <div class="ai-title">تأخر المتابعة يهدد $180K من الأنابيب</div>
+              <div class="ai-sub">4 عملاء في مرحلة المفاوضة · آخر تواصل +48 ساعة</div>
+              <div class="ai-action">خطة إنقاذ فورية ↗</div>
+            </div>
+            <div class="ai-badge badge-warn">خطر</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bot-row">
+
+    <!-- REVENUE LEAKAGE -->
+    <div class="panel danger-border">
+      <div class="ph">
+        <span class="pt" style="color:var(--urgent);">تسرب الإيرادات — الآن</span>
+        <span class="pb" id="leak-since">المال يضيع</span>
+      </div>
+      <div class="pbody">
+        <div class="leak-items">
+          <div class="leak-item hot-leak">
+            <div class="leak-left">
+              <div class="leak-name">كريم العبدالله</div>
+              <div class="leak-detail">معاينة · بلا رد منذ 72 ساعة</div>
+            </div>
+            <div class="leak-right">
+              <div class="leak-cost danger">$776K</div>
+              <div class="leak-timer danger" id="lt1" data-start-hours="72">⚠ 72س 00د</div>
+            </div>
+          </div>
+          <div class="leak-item hot-leak">
+            <div class="leak-left">
+              <div class="leak-name">فيصل الحربي</div>
+              <div class="leak-detail">عرض مُرسل · لم يُرد</div>
+            </div>
+            <div class="leak-right">
+              <div class="leak-cost danger">$490K</div>
+              <div class="leak-timer danger" id="lt2" data-start-hours="48">⚠ 48س 00د</div>
+            </div>
+          </div>
+          <div class="leak-item" style="border-color:var(--gold-d)44;background:var(--gold-glow);">
+            <div class="leak-left">
+              <div class="leak-name">نورة القحطاني</div>
+              <div class="leak-detail">جديد · لم يُتواصل بعد</div>
+            </div>
+            <div class="leak-right">
+              <div class="leak-cost warn">$1.63M</div>
+              <div class="leak-timer warn-timer" id="lt3" data-start-hours="24">⚡ 24س 00د</div>
+            </div>
+          </div>
+          <div class="leak-item" style="border-color:var(--gold-d)44;background:var(--gold-glow);">
+            <div class="leak-left">
+              <div class="leak-name">عمر الشمري</div>
+              <div class="leak-detail">رسالة واتساب · لم يُرد</div>
+            </div>
+            <div class="leak-right">
+              <div class="leak-cost warn">$380K</div>
+              <div class="leak-timer warn-timer" id="lt4" data-start-hours="18">⚡ 18س 00د</div>
+            </div>
+          </div>
+        </div>
+        <div class="leak-footer">
+          <span class="lf-lbl">إجمالي الإيرادات في خطر</span>
+          <span class="lf-val">$3.28M</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOT LEADS BY INTENT SCORE -->
+    <div class="panel">
+      <div class="ph">
+        <span class="pt">العملاء الساخنون · درجة النية</span>
+        <span class="pb">AI مُقيَّم</span>
+      </div>
+      <div class="pbody">
+        <div class="lead-rows">
+          <div class="lead-row" style="border-color:var(--green)33;">
+            <div class="lead-av" style="background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);">م.ن</div>
+            <div class="lead-info">
+              <div class="lead-name">محمد ناصر</div>
+              <div class="lead-sub">MBR · MOU موقع</div>
+              <div class="intent-bar"><div class="intent-bg"><div class="intent-fill" data-width="95%" style="width:0;background:var(--green);"></div></div><span class="intent-num">95</span></div>
+            </div>
+            <div><div class="lead-val">$980K</div><div class="lead-decay" style="color:var(--green);">مستقر ✓</div></div>
+          </div>
+          <div class="lead-row" style="border-color:var(--gold)33;">
+            <div class="lead-av" style="background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);">ر.ع</div>
+            <div class="lead-info">
+              <div class="lead-name">رانيا عزيز</div>
+              <div class="lead-sub">مارينا · تفاوض</div>
+              <div class="intent-bar"><div class="intent-bg"><div class="intent-fill" data-width="88%" style="width:0;background:var(--gold);"></div></div><span class="intent-num">88</span></div>
+            </div>
+            <div><div class="lead-val">$612K</div><div class="lead-decay" style="color:var(--gold);">4 أيام</div></div>
+          </div>
+          <div class="lead-row" style="border-color:var(--gold)33;">
+            <div class="lead-av" style="background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);">أ.ع</div>
+            <div class="lead-info">
+              <div class="lead-name">أحمد العمري</div>
+              <div class="lead-sub">JBR · تواصل</div>
+              <div class="intent-bar"><div class="intent-bg"><div class="intent-fill" data-width="85%" style="width:0;background:var(--gold);"></div></div><span class="intent-num">85</span></div>
+            </div>
+            <div><div class="lead-val">$1.69M</div><div class="lead-decay" style="color:var(--gold);">يوم واحد</div></div>
+          </div>
+          <div class="lead-row" style="border-color:var(--urgent)33;background:var(--urgent-glow);">
+            <div class="lead-av" style="background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)44;">ك.ع</div>
+            <div class="lead-info">
+              <div class="lead-name">كريم العبدالله</div>
+              <div class="lead-sub">هيلز · تراجع نية</div>
+              <div class="intent-bar"><div class="intent-bg"><div class="intent-fill" data-width="45%" style="width:0;background:var(--urgent);"></div></div><span class="intent-num">45</span></div>
+            </div>
+            <div><div class="lead-val" style="color:var(--urgent);">$776K</div><div class="lead-decay" style="color:var(--urgent);animation:pulse-red 1.5s infinite;">72h ⚠</div></div>
+          </div>
+          <div class="lead-row">
+            <div class="lead-av" style="background:var(--blue-glow);color:var(--blue);border:1px solid var(--blue-d);">ل.ف</div>
+            <div class="lead-info">
+              <div class="lead-name">ليلى فان دير بيرج</div>
+              <div class="lead-sub">JLT · معاينة</div>
+              <div class="intent-bar"><div class="intent-bg"><div class="intent-fill" data-width="78%" style="width:0;background:var(--blue);"></div></div><span class="intent-num">78</span></div>
+            </div>
+            <div><div class="lead-val" style="color:var(--blue);">$531K</div><div class="lead-decay" style="color:var(--txt2);">2 ساعة</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONVERSION VELOCITY -->
+    <div class="panel">
+      <div class="ph">
+        <span class="pt">سرعة التحويل والأداء</span>
+        <span class="pb">مقارنة بأفضل الوسطاء</span>
+      </div>
+      <div class="pbody">
+        <div class="vel-grid" style="margin-bottom:8px;">
+          <div class="vel-card">
+            <div class="vel-n" style="color:var(--gold);">96.8%</div>
+            <div class="vel-l">نسبة SP/LP</div>
+            <div class="vel-trend" style="color:var(--green);">▲ أعلى 10%</div>
+          </div>
+          <div class="vel-card">
+            <div class="vel-n" style="color:var(--green);">22.5%</div>
+            <div class="vel-l">معاينة → إغلاق</div>
+            <div class="vel-trend" style="color:var(--green);">▲ ممتاز</div>
+          </div>
+          <div class="vel-card">
+            <div class="vel-n" style="color:var(--urgent);">3.2h</div>
+            <div class="vel-l">متوسط أول رد</div>
+            <div class="vel-trend" style="color:var(--urgent);">⚠ هدف &lt;30د</div>
+          </div>
+          <div class="vel-card">
+            <div class="vel-n" style="color:var(--blue);">38d</div>
+            <div class="vel-l">متوسط DOM</div>
+            <div class="vel-trend" style="color:var(--green);">▲ -9 عن المتوسط</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--line2);padding-top:7px;">
+          <div class="slabel">GCI الشهري — آخر 6 أشهر</div>
+          <div style="display:flex;align-items:flex-end;gap:4px;height:44px;">
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="ديسمبر · $28K">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="52" style="width:100%;height:0;background:var(--bg4);border-radius:2px 2px 0 0;transition:height .7s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);">D</span>
+            </div>
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="يناير · $32K">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="60" style="width:100%;height:0;background:var(--bg4);border-radius:2px 2px 0 0;transition:height .7s .05s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);">J</span>
+            </div>
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="فبراير · $24K">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="45" style="width:100%;height:0;background:var(--bg4);border-radius:2px 2px 0 0;transition:height .7s .1s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);">F</span>
+            </div>
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="مارس · $37K">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="70" style="width:100%;height:var(--bg4);background:var(--gold-d);border-radius:2px 2px 0 0;transition:height .7s .15s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);">M</span>
+            </div>
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="أبريل · $41K">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="78" style="width:100%;height:0;background:var(--gold-d);border-radius:2px 2px 0 0;transition:height .7s .2s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);">A</span>
+            </div>
+            <div class="gci-bar-wrap" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="مايو · $53K (أعلى شهر)">
+              <div style="flex:1;width:100%;display:flex;align-items:flex-end;"><div class="gci-bar" data-h="100" style="width:100%;height:0;background:var(--gold);border-radius:2px 2px 0 0;transition:height .7s .25s cubic-bezier(.4,0,.2,1);"></div></div>
+              <span style="font-size:7px;font-family:'IBM Plex Mono',monospace;color:var(--gold);">M✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- VIEW: خريطة الأنابيب -->
+<!-- ════════════════════════════════ -->
+<div id="view-pipeline" class="view">
+<div class="body">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:start;">
+    <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:8px;overflow:hidden;">
+      <div style="padding:.5rem .7rem;border-bottom:1px solid var(--line2);background:var(--bg3);display:flex;justify-content:space-between;align-items:center;flex-direction:row-reverse;">
+        <span style="font-size:10px;font-weight:700;color:var(--blue);">جديد</span>
+        <span style="font-size:8px;font-family:'IBM Plex Mono',monospace;background:var(--blue-d);color:var(--blue);padding:1px 6px;border-radius:3px;">72</span>
+      </div>
+      <div style="padding:.5rem;display:flex;flex-direction:column;gap:4px;">
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">فيصل الحربي</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">دبي هيلز · 2BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$490K</div>
+          <span style="font-size:7px;background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)33;padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">48h بلا رد ⚠</span>
+        </div>
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">نورة القحطاني</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">JBR · 4BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$1.63M</div>
+          <span style="font-size:7px;background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">إعلان</span>
+        </div>
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">عمر الشمري</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">DIFC · 1BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$380K</div>
+          <span style="font-size:7px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">إحالة</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:8px;overflow:hidden;">
+      <div style="padding:.5rem .7rem;border-bottom:1px solid var(--line2);background:var(--bg3);display:flex;justify-content:space-between;align-items:center;flex-direction:row-reverse;">
+        <span style="font-size:10px;font-weight:700;color:var(--gold);">تواصل</span>
+        <span style="font-size:8px;font-family:'IBM Plex Mono',monospace;background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);padding:1px 6px;border-radius:3px;">45</span>
+      </div>
+      <div style="padding:.5rem;display:flex;flex-direction:column;gap:4px;">
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">أحمد العمري</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">JBR · 4BR فيلا</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$1.69M</div>
+          <span style="font-size:7px;background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">نية 85</span>
+        </div>
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">سارة بنالي</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">DIFC · 1BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$403K/إيجار</div>
+          <span style="font-size:7px;background:var(--blue-glow);color:var(--blue);border:1px solid var(--blue-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">موقع</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--urgent)33;border-radius:8px;overflow:hidden;">
+      <div style="padding:.5rem .7rem;border-bottom:1px solid var(--urgent)33;background:var(--urgent-glow);display:flex;justify-content:space-between;align-items:center;flex-direction:row-reverse;">
+        <span style="font-size:10px;font-weight:700;color:var(--urgent);">معاينة ⚠</span>
+        <span style="font-size:8px;font-family:'IBM Plex Mono',monospace;background:var(--urgent);color:#fff;padding:1px 6px;border-radius:3px;">29</span>
+      </div>
+      <div style="padding:.5rem;display:flex;flex-direction:column;gap:4px;">
+        <div class="k-card" style="background:var(--urgent-glow);border-color:var(--urgent)33;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">كريم العبدالله</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">هيلز · 2BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--urgent);margin-top:3px;">$776K</div>
+          <span style="font-size:7px;background:var(--urgent);color:#fff;padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;animation:pulse-red 1.5s infinite;display:inline-block;">72h ⚠ بلا رد</span>
+        </div>
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">ليلى فان دير بيرج</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">JLT · 2BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$531K</div>
+          <span style="font-size:7px;background:var(--blue-glow);color:var(--blue);border:1px solid var(--blue-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">نية 78</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--green)33;border-radius:8px;overflow:hidden;">
+      <div style="padding:.5rem .7rem;border-bottom:1px solid var(--green)33;background:var(--green-glow);display:flex;justify-content:space-between;align-items:center;flex-direction:row-reverse;">
+        <span style="font-size:10px;font-weight:700;color:var(--green);">عرض / MOU</span>
+        <span style="font-size:8px;font-family:'IBM Plex Mono',monospace;background:var(--green-d);color:var(--green);padding:1px 6px;border-radius:3px;">18</span>
+      </div>
+      <div style="padding:.5rem;display:flex;flex-direction:column;gap:4px;">
+        <div class="k-card" style="background:var(--green-glow);border-color:var(--green)33;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">محمد ناصر</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">MBR · 3BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--green);margin-top:3px;">$980K</div>
+          <span style="font-size:7px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">MOU موقع ✓</span>
+        </div>
+        <div class="k-card">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">رانيا عزيز</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">مارينا · 3BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--gold);margin-top:3px;">$612K</div>
+          <span style="font-size:7px;background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">نية 88</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:8px;overflow:hidden;">
+      <div style="padding:.5rem .7rem;border-bottom:1px solid var(--line2);background:var(--bg3);display:flex;justify-content:space-between;align-items:center;flex-direction:row-reverse;">
+        <span style="font-size:10px;font-weight:700;color:var(--txt2);">مُغلق ✓</span>
+        <span style="font-size:8px;font-family:'IBM Plex Mono',monospace;background:var(--green-d);color:var(--green);padding:1px 6px;border-radius:3px;">29</span>
+      </div>
+      <div style="padding:.5rem;display:flex;flex-direction:column;gap:4px;">
+        <div class="k-card" style="opacity:.8;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">خوسيه مارتينيز</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">JBR · 2BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--green);margin-top:3px;">$720K</div>
+          <span style="font-size:7px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">$18K عمولة</span>
+        </div>
+        <div class="k-card" style="opacity:.8;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt);">يي تشن</div>
+          <div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);margin-top:1px;">DIFC · 1BR</div>
+          <div style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--green);margin-top:3px;">$415K</div>
+          <span style="font-size:7px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);padding:1px 4px;border-radius:2px;font-family:'IBM Plex Mono',monospace;">$10.4K عمولة</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- VIEW: ذكاء العملاء -->
+<!-- ════════════════════════════════ -->
+<div id="view-contacts" class="view">
+<div class="body">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-direction:row-reverse;margin-bottom:2px;">
+    <div class="slabel">248 جهة اتصال · 7 عملاء ساخنون</div>
+    <input type="text" placeholder="بحث..." style="font-family:'Cairo',sans-serif;font-size:11px;padding:4px 10px;border:1px solid var(--line3);border-radius:5px;background:var(--bg3);color:var(--txt);direction:rtl;width:140px;outline:none;transition:border-color .15s;" oninput="filterC(this.value)" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--line3)'">
+  </div>
+  <div class="panel">
+    <table class="ctable" id="ct">
+      <thead>
+        <tr>
+          <th>العميل</th>
+          <th>المرحلة</th>
+          <th>قيمة الصفقة</th>
+          <th>درجة النية AI</th>
+          <th>احتمال التسرب</th>
+          <th>آخر تواصل</th>
+          <th>إجراء AI</th>
+        </tr>
+      </thead>
+      <tbody id="ctb">
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div><div style="font-size:11px;font-weight:600;">محمد ناصر</div><div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);">عُمان · مشترٍ</div></div><div style="width:22px;height:22px;border-radius:4px;background:var(--green-glow);border:1px solid var(--green-d);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--green);">م.ن</div></div></td>
+          <td><span class="stage-pill" style="background:var(--green-glow);color:var(--green);border:1px solid var(--green-d);">MOU موقع</span></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);">$980K</td>
+          <td><div class="score-wrap"><div class="sc-bg"><div class="sc-fill" data-width="95%" style="width:0;background:var(--green);"></div></div><span class="sc-n">95</span></div></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--green);font-size:9px;">منخفض 5%</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt2);">منذ 4س</td>
+          <td><button class="act-btn" onclick="sendPrompt('الخطوات القانونية التالية بعد MOU في دبي لمحمد ناصر')">إجراء ↗</button></td>
+        </tr>
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div><div style="font-size:11px;font-weight:600;">أحمد العمري</div><div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);">الإمارات · مشترٍ</div></div><div style="width:22px;height:22px;border-radius:4px;background:var(--gold-glow);border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--gold);">أ.ع</div></div></td>
+          <td><span class="stage-pill" style="background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);">تواصل</span></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);">$1.69M</td>
+          <td><div class="score-wrap"><div class="sc-bg"><div class="sc-fill" data-width="85%" style="width:0;background:var(--gold);"></div></div><span class="sc-n">85</span></div></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:9px;">متوسط 22%</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt2);">منذ يوم</td>
+          <td><button class="act-btn" onclick="sendPrompt('صغ رسالة صوتية واتساب لأحمد العمري تستعجل قرار شراء فيلا JBR')">متابعة ↗</button></td>
+        </tr>
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div><div style="font-size:11px;font-weight:600;">كريم العبدالله</div><div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);">الكويت · مشترٍ</div></div><div style="width:22px;height:22px;border-radius:4px;background:var(--urgent-glow);border:1px solid var(--urgent)44;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--urgent);">ك.ع</div></div></td>
+          <td><span class="stage-pill" style="background:var(--urgent-glow);color:var(--urgent);border:1px solid var(--urgent)44;">خطر ⚠</span></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--urgent);">$776K</td>
+          <td><div class="score-wrap"><div class="sc-bg"><div class="sc-fill" data-width="45%" style="width:0;background:var(--urgent);"></div></div><span class="sc-n" style="color:var(--urgent);">45</span></div></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--urgent);font-size:9px;animation:pulse-red 1.5s infinite;">عالٍ جداً 78%</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--urgent);">72 ساعة ⚠</td>
+          <td><button class="act-btn" style="color:var(--urgent);border-color:var(--urgent)44;" onclick="sendPrompt('اكتب رسالة إنقاذ عاجلة لكريم العبدالله بعد 72 ساعة صمت - عقار دبي هيلز $776K')">إنقاذ ↗</button></td>
+        </tr>
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div><div style="font-size:11px;font-weight:600;">رانيا عزيز</div><div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);">السعودية · مشترية</div></div><div style="width:22px;height:22px;border-radius:4px;background:var(--gold-glow);border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--gold);">ر.ع</div></div></td>
+          <td><span class="stage-pill" style="background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-d);">تفاوض</span></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);">$612K</td>
+          <td><div class="score-wrap"><div class="sc-bg"><div class="sc-fill" data-width="88%" style="width:0;background:var(--gold);"></div></div><span class="sc-n">88</span></div></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:9px;">منخفض 15%</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt2);">منذ 4 أيام</td>
+          <td><button class="act-btn" onclick="sendPrompt('نصائح تفاوض متقدمة لإغلاق صفقة مارينا مع رانيا عزيز')">تفاوض ↗</button></td>
+        </tr>
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;"><div><div style="font-size:11px;font-weight:600;">ليلى فان دير بيرج</div><div style="font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--txt2);">هولندا · مستثمرة</div></div><div style="width:22px;height:22px;border-radius:4px;background:var(--blue-glow);border:1px solid var(--blue-d);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--blue);">ل.ف</div></div></td>
+          <td><span class="stage-pill" style="background:var(--blue-glow);color:var(--blue);border:1px solid var(--blue-d);">معاينة</span></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue);">$531K</td>
+          <td><div class="score-wrap"><div class="sc-bg"><div class="sc-fill" data-width="78%" style="width:0;background:var(--blue);"></div></div><span class="sc-n">78</span></div></td>
+          <td style="font-family:'IBM Plex Mono',monospace;color:var(--txt2);font-size:9px;">منخفض 18%</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txt2);">منذ 2س</td>
+          <td><button class="act-btn" onclick="sendPrompt('اقترح عقارات مشابهة لمارينا جيت لمستثمرة هولندية بنفس الميزانية')">اقتراح ↗</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- VIEW: المهام العاجلة -->
+<!-- ════════════════════════════════ -->
+<div id="view-tasks" class="view">
+<div class="body">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div class="panel danger-border">
+      <div class="ph"><span class="pt" style="color:var(--urgent);">عاجل — الآن</span><span class="pb">3 مهام حرجة</span></div>
+      <div class="pbody">
+        <div id="urgent-tasks">
+          <div class="task-item"><div class="task-chk" id="u1" onclick="toggleT('u1','ux1')"></div><span class="task-txt" id="ux1">متابعة كريم العبدالله — 72 ساعة صمت</span><span class="due-pill du">الآن ⚠</span></div>
+          <div class="task-item"><div class="task-chk" id="u2" onclick="toggleT('u2','ux2')"></div><span class="task-txt" id="ux2">اتصال بأحمد العمري — مكالمة متابعة</span><span class="due-pill du">اليوم ⚠</span></div>
+          <div class="task-item"><div class="task-chk" id="u3" onclick="toggleT('u3','ux3')"></div><span class="task-txt" id="ux3">تعديل سعر عقار #204 (62 يوم)</span><span class="due-pill du">متأخر ⚠</span></div>
+          <div class="task-item"><div class="task-chk" id="u4" onclick="toggleT('u4','ux4')"></div><span class="task-txt" id="ux4">رد على واتساب نورة القحطاني</span><span class="due-pill dw">اليوم</span></div>
+          <div class="task-item"><div class="task-chk" id="u5" onclick="toggleT('u5','ux5')"></div><span class="task-txt" id="ux5">إرسال CMA لكريم العبدالله</span><span class="due-pill dw">اليوم</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span class="pt">هذا الأسبوع</span><span class="pb">5 مهام مجدولة</span></div>
+      <div class="pbody">
+        <div class="task-item"><div class="task-chk done">✓</div><span class="task-txt done">إرسال عرض سارة بنالي</span><span class="due-pill dg">منجزة</span></div>
+        <div class="task-item"><div class="task-chk done">✓</div><span class="task-txt done">تأكيد معاينة مارينا جيت</span><span class="due-pill dg">منجزة</span></div>
+        <div class="task-item"><div class="task-chk" id="w1" onclick="toggleT('w1','wx1')"></div><span class="task-txt" id="wx1">جلسة استراتيجية مع إيمار</span><span class="due-pill dw">غداً</span></div>
+        <div class="task-item"><div class="task-chk" id="w2" onclick="toggleT('w2','wx2')"></div><span class="task-txt" id="wx2">مراجعة عقد DIFC</span><span class="due-pill dw">الأربعاء</span></div>
+        <div class="task-item"><div class="task-chk" id="w3" onclick="toggleT('w3','wx3')"></div><span class="task-txt" id="wx3">معاينة ثانية — ليلى فان دير بيرج</span><span class="due-pill dg">الجمعة</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">مهام قادمة</span><span class="pb">يونيو 2026</span></div>
+    <div class="pbody">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+        <div class="task-item"><div class="task-chk" id="f1" onclick="toggleT('f1','fx1')"></div><span class="task-txt" id="fx1">تجديد إدراج صوبها</span><span class="due-pill dg">15 يونيو</span></div>
+        <div class="task-item"><div class="task-chk" id="f2" onclick="toggleT('f2','fx2')"></div><span class="task-txt" id="fx2">متابعة ما بعد الإغلاق — محمد</span><span class="due-pill dg">20 يونيو</span></div>
+        <div class="task-item"><div class="task-chk" id="f3" onclick="toggleT('f3','fx3')"></div><span class="task-txt" id="fx3">معرض سيتي سكيب دبي</span><span class="due-pill dg">25 يونيو</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- AI PROMPT MODAL -->
+<div class="modal-overlay" id="ai-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet" dir="rtl">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:9px;background:var(--urgent);color:#fff;padding:1px 5px;border-radius:3px;font-family:'IBM Plex Mono',monospace;">AI LIVE</span>
+        <span style="font-size:11px;font-weight:700;color:var(--txt);">مطالبة الذكاء الاصطناعي</span>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:18px;line-height:1;padding:2px 4px;transition:color .15s;" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">✕</button>
+    </div>
+    <div id="modal-prompt-text" class="modal-prompt-body"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="modal-btn modal-btn-copy" onclick="copyPrompt()">نسخ المطالبة ⎘</button>
+      <button class="modal-btn modal-btn-claude" onclick="openClaude()">فتح في Claude ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-msg" id="toast-el"></div>
+
+</div>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(n, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  (el || event.target).classList.add('active');
+  document.getElementById('view-' + n).classList.add('active');
+  animateFills();
+  if (n === 'ops') animateGCIBars();
+}
+
+// ── TASK TOGGLE ──
+function toggleT(c, t) {
+  const el = document.getElementById(c), tx = document.getElementById(t);
+  if (el.classList.contains('done')) {
+    el.classList.remove('done'); el.textContent = ''; tx.classList.remove('done');
+  } else {
+    el.classList.add('done'); el.textContent = '✓'; tx.classList.add('done');
+  }
+}
+
+// ── CONTACT FILTER ──
+function filterC(v) {
+  document.querySelectorAll('#ctb tr').forEach(r => {
+    r.style.display = r.textContent.includes(v) ? '' : 'none';
+  });
+}
+
+// ── AI PROMPT MODAL ──
+function sendPrompt(text) {
+  document.getElementById('modal-prompt-text').textContent = text;
+  document.getElementById('ai-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('ai-modal').classList.remove('open');
+}
+function copyPrompt() {
+  const text = document.getElementById('modal-prompt-text').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('تم نسخ المطالبة ✓'));
+  closeModal();
+}
+function openClaude() {
+  const text = document.getElementById('modal-prompt-text').textContent;
+  window.open('https://claude.ai/new?q=' + encodeURIComponent(text), '_blank');
+  closeModal();
+}
+function showToast(msg) {
+  const t = document.getElementById('toast-el');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── LIVE CLOCK ──
+function startClock() {
+  const update = () => {
+    const n = new Date();
+    const t = n.toLocaleTimeString('ar-AE', { hour: '2-digit', minute: '2-digit' });
+    const el = document.getElementById('live-clock');
+    if (el) el.textContent = t + ' · مايو 2026 · Q2';
+  };
+  update();
+  setInterval(update, 1000);
+}
+
+// ── ANIMATE FILLS (pipeline bars, intent bars, score bars) ──
+function animateFills() {
+  document.querySelectorAll('[data-width]').forEach(el => {
+    const target = el.getAttribute('data-width');
+    el.style.width = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.width = target; }));
+  });
+}
+
+// ── ANIMATE GCI BARS ──
+function animateGCIBars() {
+  document.querySelectorAll('.gci-bar').forEach(b => {
+    const h = b.getAttribute('data-h');
+    b.style.height = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => { b.style.height = h + '%'; }));
+  });
+}
+
+// ── LIVE LEAK TIMERS (count up every 60s) ──
+const leakTimers = [
+  { id: 'lt1', hours: 72, prefix: '⚠ ' },
+  { id: 'lt2', hours: 48, prefix: '⚠ ' },
+  { id: 'lt3', hours: 24, prefix: '⚡ ' },
+  { id: 'lt4', hours: 18, prefix: '⚡ ' }
+];
+function renderTimers() {
+  leakTimers.forEach(d => {
+    const el = document.getElementById(d.id);
+    if (!el) return;
+    const h = Math.floor(d.hours);
+    const m = Math.floor((d.hours - h) * 60);
+    el.textContent = d.prefix + h + 'س ' + String(m).padStart(2, '0') + 'د';
+  });
+}
+function tickTimers() {
+  leakTimers.forEach(d => { d.hours += 1 / 60; });
+  renderTimers();
+}
+renderTimers();
+setInterval(tickTimers, 60000);
+
+// ── INIT ──
+startClock();
+animateFills();
+animateGCIBars();
+</script>
+</body>
+</html>
